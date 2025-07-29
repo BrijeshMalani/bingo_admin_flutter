@@ -1,15 +1,15 @@
-import 'package:bingoadmin/api_service/api_service.dart';
-import 'package:bingoadmin/screens/tabbed_screen.dart';
-import 'package:bingoadmin/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'
     show TextInputFormatter, FilteringTextInputFormatter;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:bingoadmin/api_service/api_service.dart';
+import 'package:bingoadmin/screens/tabbed_screen.dart';
+import 'package:bingoadmin/utils/common.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -26,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? playerData;
   String? errorMessage;
   dynamic rawApiResponse;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -51,90 +52,117 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width > 600;
     final double fieldWidth = isWide ? 400 : double.infinity;
+    final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F8FB), // Light background
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 500),
+              constraints: const BoxConstraints(maxWidth: 500),
               child: Card(
-                elevation: 8,
+                elevation: 12,
                 margin: const EdgeInsets.all(24),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(32),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 32,
+                    horizontal: 32,
+                    vertical: 40,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // App Name/Header
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.search,
+                            Icons.sports_esports,
                             color: Colors.blueAccent,
-                            size: 32,
+                            size: 36,
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 10),
                           Text(
-                            'Player Info Search',
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
+                            'Bingo Admin',
+                            style: theme.textTheme.headlineSmall?.copyWith(
                               color: Colors.blueAccent,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 32),
-                      Text(
-                        'API Settings',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[700],
-                        ),
+                      // API Settings Section
+                      Row(
+                        children: [
+                          Icon(Icons.settings, color: Colors.blueGrey[400]),
+                          const SizedBox(width: 8),
+                          Text(
+                            'API Settings',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey[700],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       SizedBox(
                         width: fieldWidth,
                         child: TextField(
                           controller: baseUrlController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Base URL',
                             hintText: 'e.g. http://149.28.62.120:3000/',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.link),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            prefixIcon: const Icon(Icons.link),
+                            filled: true,
+                            fillColor: Colors.grey[100],
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Player Details',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[700],
-                        ),
+                      const SizedBox(height: 28),
+                      // Player Details Section
+                      Row(
+                        children: [
+                          Icon(Icons.person, color: Colors.blueGrey[400]),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Player Details',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey[700],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       SizedBox(
                         width: fieldWidth,
                         child: TextField(
                           controller: bbIdController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: InputDecoration(
                             labelText: 'bbId',
                             hintText: 'Enter bbId',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.person),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            prefixIcon: const Icon(Icons.numbers),
+                            filled: true,
+                            fillColor: Colors.grey[100],
                           ),
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 36),
+                      // Search Button
                       SizedBox(
                         width: fieldWidth,
                         height: 56,
@@ -142,90 +170,131 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blueAccent,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                             textStyle: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          onPressed: () async {
-                            FocusScope.of(context).unfocus();
-                            final baseUrl = baseUrlController.text.trim();
-                            final bbId = bbIdController.text.trim();
-                            await _saveData(baseUrl, bbId);
-                            setState(() {
-                              errorMessage = null;
-                              playerData = null;
-                              playerInfo = null;
-                              rawApiResponse = null;
-                            });
-                            var result = await PostService.playerDataFetch(
-                              reqBody: {
-                                "payload": {"bbId": bbId},
-                              },
-                              baseUrl: baseUrl,
-                            );
-                            if (result != null &&
-                                result["data"] != null &&
-                                result["data"]["playerInfo"] != null) {
-                              setState(() {
-                                playerData = result["data"];
-                                playerInfo = result["data"]["playerInfo"];
-                              });
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      TabbedScreen(playerData: playerData),
-                                ),
-                              );
-                            } else if (result != null) {
-                              setState(() {
-                                rawApiResponse = result;
-                                errorMessage =
-                                    "Player info not found in response. Showing raw response.";
-                              });
-                            } else {
-                              setState(() {
-                                errorMessage =
-                                    "Something went wrong! Retry Again";
-                              });
-                              Fluttertoast.showToast(
-                                msg: "Something went wrong! Retry Again",
-                                gravity: ToastGravity.CENTER,
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.search, color: Colors.white),
-                          label: const Text(
-                            'Search',
-                            style: TextStyle(color: Colors.white),
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  FocusScope.of(context).unfocus();
+                                  final baseUrl = baseUrlController.text.trim();
+                                  final bbId = bbIdController.text.trim();
+                                  await _saveData(baseUrl, bbId);
+                                  setState(() {
+                                    errorMessage = null;
+                                    playerData = null;
+                                    playerInfo = null;
+                                    rawApiResponse = null;
+                                    isLoading = true;
+                                  });
+                                  var result =
+                                      await PostService.playerDataFetch(
+                                        reqBody: {
+                                          "payload": {"bbId": bbId},
+                                        },
+                                        baseUrl: baseUrl,
+                                      );
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                  if (result != null &&
+                                      result["data"] != null &&
+                                      result["data"]["playerInfo"] != null) {
+                                    setState(() {
+                                      playerData = result["data"];
+                                      playerInfo = result["data"]["playerInfo"];
+                                    });
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => TabbedScreen(
+                                          playerData: playerData,
+                                        ),
+                                      ),
+                                    );
+                                  } else if (result != null) {
+                                    setState(() {
+                                      rawApiResponse = result;
+                                      errorMessage =
+                                          "Player info not found in response. Showing raw response.";
+                                    });
+                                  } else {
+                                    setState(() {
+                                      errorMessage =
+                                          "Something went wrong! Retry Again";
+                                    });
+                                    Fluttertoast.showToast(
+                                      msg: "Something went wrong! Retry Again",
+                                      gravity: ToastGravity.CENTER,
+                                    );
+                                  }
+                                },
+                          icon: isLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Icon(Icons.search, color: Colors.white),
+                          label: Text(
+                            isLoading ? 'Searching...' : 'Search',
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
+                      // Error/Feedback Section
                       if (errorMessage != null) ...[
-                        const SizedBox(height: 24),
-                        Text(
-                          errorMessage!,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
+                        const SizedBox(height: 28),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.red[50],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.redAccent),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        if (rawApiResponse != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              rawApiResponse.toString(),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.black54,
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.error_outline,
+                                    color: Colors.redAccent,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      errorMessage!,
+                                      style: const TextStyle(
+                                        color: Colors.redAccent,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
+                              if (rawApiResponse != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Text(
+                                    rawApiResponse.toString(),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
+                        ),
                       ],
+                      // ... Add more feedback or success UI here if needed ...
                     ],
                   ),
                 ),
