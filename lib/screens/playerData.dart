@@ -616,9 +616,9 @@ class _PlayerdataState extends State<Playerdata> {
                                                       .trim(),
                                                   "coins": coinsController.text
                                                       .trim(),
-                                                  "level": xpController.text
+                                                  "level": levelController.text
                                                       .trim(),
-                                                  "xpValue": levelController
+                                                  "xpValue": xpController
                                                       .text
                                                       .trim(),
                                                   "power1": powerups1Controller
