@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'
-    show TextInputFormatter, FilteringTextInputFormatter;
+import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
+// import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bingoadmin/api_service/api_service.dart';
 import 'package:bingoadmin/screens/tabbed_screen.dart';
@@ -22,6 +21,11 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController bbIdController = TextEditingController(
     text: "1025505023",
   );
+  final List<String> baseUrlOptions = [
+    Common.BASE_URL,
+    'http://149.28.62.120:3000/',
+    'http://139.84.145.171:3000/',
+  ];
   Map<String, dynamic>? playerInfo;
   Map<String, dynamic>? playerData;
   String? errorMessage;
@@ -120,6 +124,29 @@ class _HomeScreenState extends State<HomeScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             prefixIcon: const Icon(Icons.link),
+                            suffixIcon: PopupMenuButton<String>(
+                              icon: const Icon(Icons.arrow_drop_down),
+                              tooltip: 'Select Base URL',
+                              onSelected: (String selectedUrl) {
+                                setState(() {
+                                  baseUrlController.text = selectedUrl;
+                                  baseUrlController.selection =
+                                      TextSelection.collapsed(
+                                        offset: selectedUrl.length,
+                                      );
+                                });
+                              },
+                              itemBuilder: (BuildContext context) {
+                                return baseUrlOptions
+                                    .map(
+                                      (option) => PopupMenuItem<String>(
+                                        value: option,
+                                        child: Text(option),
+                                      ),
+                                    )
+                                    .toList();
+                              },
+                            ),
                             filled: true,
                             fillColor: Colors.grey[100],
                           ),
